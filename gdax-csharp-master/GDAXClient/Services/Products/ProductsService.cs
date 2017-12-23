@@ -65,12 +65,11 @@ namespace GDAXClient.Products
 
         public async Task<ProductStats> GetProductStatsAsync(ProductType productPair)
         {
-            return null;
-            //var httpResponseMessage = await SendHttpRequestMessageAsync(HttpMethod.Get, authenticator, $"/products/{productPair.ToDasherizedUpper()}/stats");
-            //var contentBody = await httpClient.ReadAsStringAsync(httpResponseMessage).ConfigureAwait(false);
-            //var productStatsResponse = JsonConvert.DeserializeObject<ProductStats>(contentBody);
+            var httpResponseMessage = await SendHttpRequestMessageAsync(HttpMethod.Get, authenticator, "/products/"+productPair.ToDasherizedUpper()+"/stats");
+            var contentBody = await httpClient.ReadAsStringAsync(httpResponseMessage).ConfigureAwait(false);
+            var productStatsResponse = JsonConvert.DeserializeObject<ProductStats>(contentBody);
 
-            //return productStatsResponse;
+            return productStatsResponse;
         }
     }
 }

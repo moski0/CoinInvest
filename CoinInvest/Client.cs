@@ -125,5 +125,23 @@ namespace CoinInvest
             }
             return res;
         }
+
+        public ProductStats GetProductStatsSync(ProductType productType)
+        {
+            ProductStats res = null;
+            try
+            {
+                res = Task.Run(async () => { return await this.ProductsService.GetProductStatsAsync(productType); }).Result;
+            }
+            catch (Exception ex)
+            {
+                ex = null;
+
+            }
+            return res;
+
+
+            
+        }
     }
 }

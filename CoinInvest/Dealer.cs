@@ -30,6 +30,15 @@ namespace CoinInvest
         DateTime time;
         
         ProductType productType;
+
+        private class ImportantValues
+        {
+            public static decimal buyPricePercentageFromActualPrice = (decimal)0.1;//3
+            public static int buyLimitPercentageFromDayMax = 80;
+            public static decimal sellProfitPercentageFromBuyPrice = (decimal)0.3;//5
+        }
+
+
         public Dealer(Client client, String currency, XElement config)
         {
             this.client = client;
@@ -106,9 +115,12 @@ namespace CoinInvest
             return res;
         }
 
+
+        
+
         private BuyCoinOrder PrepareBuyOrder(decimal sizeEur, decimal tradePrice)
         {
-            decimal add = (decimal)0.003;
+            decimal add = ImportantValues.buyPricePercentageFromActualPrice / (decimal)100;
             decimal sizeCoin = sizeEur / tradePrice;
             sizeCoin = CutSize(sizeCoin, tradePrice);
 
@@ -126,10 +138,12 @@ namespace CoinInvest
         }
 
 
+        
+
         private SellCoinOrder PrepareSellOrder(FillResponse buyOrder, decimal tradePrice)
         {
 
-            decimal add = (decimal)0.005;
+            decimal add = ImportantValues.sellProfitPercentageFromBuyPrice / (decimal)100;
             decimal calcPrice = buyOrder.Price + (add * buyOrder.Price);
 
             //TODO: this line is possible to use only in case that we want get EURO
@@ -182,13 +196,38 @@ namespace CoinInvest
             if (IsSizeAvailable(accountBuy, sizeEur) == true)
             {
                 BuyCoinOrder order = PrepareBuyOrder(sizeEur, tradePrice);
-                Guid id = MakeOrder(order);
-                actualListOrder.Add(id.ToString());
+                if (boAllowBuyOrder(order) == true)
+                {
+                    Guid id = MakeOrder(order);
+                    actualListOrder.Add(id.ToString());
+                }   
             }
-            else
+          //  else
             {
 
             }
+        }
+
+
+        
+        //TODO: class invest to separate orders with diffrerent profit/risk
+        private bool boAllowBuyOrder(AbstractCoinOrder order)
+        {
+            bool res = false;
+            var dayInfo = client.GetProductStatsSync(productType);
+            decimal max = dayInfo.Low+ ((dayInfo.High - dayInfo.Low)  *ImportantValues.buyLimitPercentageFromDayMax/100);
+
+            decimal predictedSellPrice = order.Price*(1+ImportantValues.sellProfitPercentageFromBuyPrice/100);
+
+            if (max > predictedSellPrice)
+            {
+                res = true;
+            }
+            else
+            {
+                res = false;
+            }
+            return res;
         }
 
         private void Sell()
