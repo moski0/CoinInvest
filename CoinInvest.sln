@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinInvest", "CoinInvest\CoinInvest.csproj", "{53E6CD12-3B38-4DDD-A18A-72BFF796A258}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDAXClient", "gdax-csharp-master\GDAXClient\GDAXClient.csproj", "{454A0FAC-C580-4674-AE58-6D8E6658685B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GDAXClient.Specs", "gdax-csharp-master\GDAXClient.Specs\GDAXClient.Specs.csproj", "{3F1CF230-DEFD-4D8E-8BA5-B8CB86218800}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{53E6CD12-3B38-4DDD-A18A-72BFF796A258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53E6CD12-3B38-4DDD-A18A-72BFF796A258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53E6CD12-3B38-4DDD-A18A-72BFF796A258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53E6CD12-3B38-4DDD-A18A-72BFF796A258}.Release|Any CPU.Build.0 = Release|Any CPU
+		{454A0FAC-C580-4674-AE58-6D8E6658685B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{454A0FAC-C580-4674-AE58-6D8E6658685B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{454A0FAC-C580-4674-AE58-6D8E6658685B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{454A0FAC-C580-4674-AE58-6D8E6658685B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F1CF230-DEFD-4D8E-8BA5-B8CB86218800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F1CF230-DEFD-4D8E-8BA5-B8CB86218800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F1CF230-DEFD-4D8E-8BA5-B8CB86218800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F1CF230-DEFD-4D8E-8BA5-B8CB86218800}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
