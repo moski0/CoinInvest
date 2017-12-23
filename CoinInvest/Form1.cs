@@ -86,43 +86,7 @@ namespace CoinInvest
             {
                 dealer.Stop();
             }
-            button1.Text = "Stoped";
-
-            
-
-          
-
-            
-
-
-
-            //this.timer = new System.Timers.Timer(1000);
-            //this.timer.Elapsed += new ElapsedEventHandler(timerElapsed);
-            //this.timer.Enabled = true;
-
-
-            
-            
-            
-            //!real account
-            //String phrase = "lj1yu7r1tt";
-
-            //String apiKey = "3b04d3b671eda39a1ab777ef80ff7ae0";
-            //String secret = "MIX+r+beqTMnMVm9UUCQ3TVBGBnNt18F6zP3MiPG7Dvyamy/+jiSNXaUPA7rzrZSX1sdh3f9vzx0D4R3TRL1nQ==";
-
-            //GDAXClient.Authentication.Authenticator aut = new GDAXClient.Authentication.Authenticator(apiKey, secret, phrase);
-            //GDAXClient.GDAXClient client = new GDAXClient.GDAXClient(aut);
-            //var a = await client.OrdersService.PlaceLimitOrderAsync(GDAXClient.Services.Orders.OrderSide,  AccountsService.GetAllAccountsAsync();
-
-
-
-            //   var a = await client.OrdersService.PlaceLimitOrderAsync()
-           // textBox1.Text = a.ToString();
-            int b = 0;
-
-            //xxx();
-
-            
+            button1.Text = "Stoped";            
         }
 
 
