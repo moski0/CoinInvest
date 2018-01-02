@@ -1,4 +1,5 @@
 ﻿using CoinInvest.Coin;
+using CoinInvest.ListOrder;
 using CoinInvest.Trade;
 using GDAXClient.Services.Accounts;
 using GDAXClient.Services.Currencies.Models;
@@ -23,19 +24,25 @@ namespace CoinInvest
         private XElement config;
         private int precision = 8;
 
-        private LinkedList<Guid> listRunningOrders;
+        //private LinkedList<Guid> listRunningOrders;
         private LinkedList<Guid> listRequestedOrderIds;
-        private ActualListOrder actualListOrder;
-
+        private ActualListOrder actualListBuyOrder;
+        private ActualListOrder actualListSellOrder;
+        private TradeHistory history;
+        //private Object _lock = new object();
+        private bool requestStop = false;
+        public bool SellOnly { get; set; }
         DateTime time;
         
         ProductType productType;
 
         private class ImportantValues
         {
-            public static decimal buyPricePercentageFromActualPrice = (decimal)0.1;//3
+            public static decimal buyPricePercentageFromActualPrice = (decimal)0.3;//3
             public static int buyLimitPercentageFromDayMax = 80;
-            public static decimal sellProfitPercentageFromBuyPrice = (decimal)0.3;//5
+            public static decimal sellProfitPercentageFromBuyPrice = (decimal)0.5;//5
+            public static decimal buyCoinSize = (decimal)0.02;
+            public static decimal minPriceInEur = (decimal)0.01;
         }
 
 
@@ -43,11 +50,14 @@ namespace CoinInvest
         {
             this.client = client;
             this.trade = new TradeWebSockerTicker(currency);
-            this.listRequestedOrderIds = new LinkedList<Guid>();
-            this.listRunningOrders = new LinkedList<Guid>();
-            this.actualListOrder = new ActualListOrder();//TODO: edit for more Dealers.. file name is the same
+            
+            this.actualListBuyOrder = new ActualListOrder("OrderBuyData.xml");//TODO: edit for more Dealers.. file name is the same
+            this.actualListSellOrder = new ActualListOrder("OrderSellData.xml");
+            this.history = new TradeHistory("TradeHistory.xml");
 
             this.productType = Utils.GetProductType(currency);
+
+            SellOnly = false;
              
         }
 
@@ -133,7 +143,7 @@ namespace CoinInvest
             BuyCoinOrder order = new BuyCoinOrder();
             order.BuyPrice = buyPrice;
             order.Price = buyPrice;
-            order.Size = (decimal)0.01;//sizeCoin;TODO: edit accoring to min size
+            order.Size = ImportantValues.buyCoinSize; //(decimal)0.01;//sizeCoin;TODO: edit accoring to min size
             return order;
         }
 
@@ -157,7 +167,7 @@ namespace CoinInvest
             calcPrice = tmp/100;
             #endregion
 
-            decimal price = (calcPrice > tradePrice) ? calcPrice : tradePrice;         
+            decimal price = (calcPrice > tradePrice) ? calcPrice : tradePrice+ImportantValues.minPriceInEur;         
 
             SellCoinOrder order = new SellCoinOrder();
             order.BuyPrice = price;
@@ -167,13 +177,27 @@ namespace CoinInvest
         }
 
 
-        public void Stop()
+        public void RequestStop()
         {
-            this.actualListOrder.Safe();
+            //lock(_lock)
+            {
+                requestStop = true;
+                Stop();
+                trade.Close();
+                
+            }
+
+        }
+
+        private void Stop()
+        {
+            this.actualListBuyOrder.Save();
+            this.actualListSellOrder.Save();
+            this.history.Save();
         }
 
 
-        private Guid MakeOrder(AbstractCoinOrder order)
+        private OrderResponse MakeOrder(AbstractCoinOrder order)
         {
             OrderSide type;
             if (order is BuyCoinOrder)
@@ -184,27 +208,35 @@ namespace CoinInvest
                 type = OrderSide.Sell;
             }
             OrderResponse response = client.PlaceLimitOrderSync(type, productType, order.Size, order.Price);
-            return response.Id;
+            return response;
         }
 
 
         private void Buy()
         {
-            decimal tradePrice = this.trade.TradeStatus.Price;
-            decimal sizeEur = GetSizeForDealEur();
-            SetAccounts(this.productType);  
-            if (IsSizeAvailable(accountBuy, sizeEur) == true)
-            {
-                BuyCoinOrder order = PrepareBuyOrder(sizeEur, tradePrice);
-                if (boAllowBuyOrder(order) == true)
-                {
-                    Guid id = MakeOrder(order);
-                    actualListOrder.Add(id.ToString());
-                }   
-            }
-          //  else
+            try
             {
 
+
+                decimal tradePrice = this.trade.TradeStatus.Price;
+                decimal sizeEur = GetSizeForDealEur();
+                SetAccounts(this.productType);
+                if (IsSizeAvailable(accountBuy, sizeEur) == true)
+                {
+                    BuyCoinOrder order = PrepareBuyOrder(sizeEur, tradePrice);
+                    if (boAllowBuyOrder(order) == true)
+                    {
+                        OrderResponse orderResponse = MakeOrder(order);
+                        if (orderResponse != null)
+                        {
+                            actualListBuyOrder.Add(orderResponse.Id.ToString());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex = null;
             }
         }
 
@@ -233,8 +265,29 @@ namespace CoinInvest
         private void Sell()
         {
             List<OrderResponse> listOrdersRun = client.GetAllOrdersSync();
+
+            foreach (var idSell in actualListSellOrder.GetIds())
+            {
+                bool boFound = false;
+                foreach (var orderRun in listOrdersRun)
+                {
+                    if (orderRun.Id.ToString() == idSell)
+                    {
+                        boFound = true;
+                        break;
+                    }
+                }
+                if (boFound == false)
+                {
+                    var tmp = client.GetFillsByOrderIdSync(idSell);
+                    history.AddSell(tmp);
+                }
+            }
+
+
+
             List<String> listOrdersDone = new List<String>();
-            foreach (var orderIdRequested in this.actualListOrder.GetIds())
+            foreach (var orderIdRequested in this.actualListBuyOrder.GetIds())
 	        {
                 bool boFound = false;
                 foreach (var orderRun in listOrdersRun)
@@ -256,6 +309,8 @@ namespace CoinInvest
             {
                 Sell(item);
             }
+
+           
         }
 
         private void Sell(String id)
@@ -263,19 +318,43 @@ namespace CoinInvest
             decimal price = this.trade.TradeStatus.Price;
             FillResponse fillOrder = client.GetFillsByOrderIdSync(id);
             SellCoinOrder sellOrder = PrepareSellOrder(fillOrder, price);
-            Guid sellId = MakeOrder(sellOrder);
-            actualListOrder.Remove(id);
+            OrderResponse orderResponse = MakeOrder(sellOrder);
+            if (orderResponse != null)
+            { 
+                actualListBuyOrder.Remove(id);
+                String sellId = orderResponse.Id.ToString();
+                actualListSellOrder.Add(sellId);
+                history.AddBuy(sellId, fillOrder);
+            }
+
+
         }
 
 
         public void MakeDeal()
         {
-            if ((DateTime.Now - time).TotalSeconds >30)
+            if (SellOnly == false)
             {
-                Buy();
-                time = DateTime.Now;
+                if ((DateTime.Now - time).TotalSeconds > 60)
+                {
+                    Buy();
+                    time = DateTime.Now;
+                }
             }
             Sell();
+
+
+            
+
+            
+
+            //lock (_lock)
+            {
+              //  if (requestStop == true)
+                {
+
+                }
+            }
         }
 
         private bool IsSizeAvailable(Account account ,decimal sizeEur)

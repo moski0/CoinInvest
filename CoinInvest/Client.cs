@@ -29,6 +29,7 @@ namespace CoinInvest
             }
             catch (Exception ex)
             {
+                //logger.addException(
                 ex = null;
             }
             return res;

@@ -25,10 +25,12 @@ namespace CoinInvest
         AbstractTrade trade;
         AbstractTrade trade2;
 
-        Dealer dealer;
+        //Dealer dealer;
+        DealerManager manager;
         public Form1()
         {
             InitializeComponent();
+
         }
 
 
@@ -55,38 +57,30 @@ namespace CoinInvest
 
         private async void  button1_Click(object sender, EventArgs e)
         {
-
-
-            GDAXClient.Authentication.Authenticator aut = new GDAXClient.Authentication.Authenticator(Secret.apiKey, Secret.secret, Secret.phrase);
-
-            Client client = new Client(aut);
-            button1.Text = "Running";
-            //trade2 = new TradeRestApi(client, Constants.LTC_EUR);
-            //trade = new TradeWebSockerTicker(Constants.LTC_EUR);
-
-            DateTime time = DateTime.Now;
-            dealer = new Dealer(client, Constants.LTC_EUR, new XElement("xxx"));
-
             try
             {
-                while ((DateTime.Now - time).TotalMinutes < 1000)
-                {
-                    dealer.MakeDeal();
-                    Thread.Sleep(1000);
-                }
+               GDAXClient.Authentication.Authenticator aut = new GDAXClient.Authentication.Authenticator(Secret.apiKey, Secret.secret, Secret.phrase);
+
+                Client client = new Client(aut);
+                manager = new DealerManager(client);
+
+
+                button1.Text = "Running";
+                //trade2 = new TradeRestApi(client, Constants.LTC_EUR);
+                //trade = new TradeWebSockerTicker(Constants.LTC_EUR);
+
+                //DateTime time = DateTime.Now;
+                //dealer = new Dealer(client, Constants.LTC_EUR, new XElement("xxx"));
 
             }
             catch (Exception ex)
             {
                 ex = null;
-
-                
             }
             finally
             {
-                dealer.Stop();
             }
-            button1.Text = "Stoped";            
+            
         }
 
 
@@ -106,6 +100,25 @@ namespace CoinInvest
             {//number.ToString()+
                 this.textBox1.Text = "#\r\n " + text + "   "+ "    "+ text2 +" \r\n";
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                manager.Stop();
+            }
+            catch (Exception ex)
+            {
+
+                ex = null;
+            }
+            
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            manager.SellOnly = checkBox1.Checked;
         }  
 
         

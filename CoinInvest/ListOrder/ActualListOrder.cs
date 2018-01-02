@@ -6,15 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace CoinInvest
+namespace CoinInvest.ListOrder
 {
     public class ActualListOrder
     {
         List<String> list;
-        String path = "data.xml";
+        String path;
         
-        public ActualListOrder()
+        public ActualListOrder(String path)
         {
+            this.path = path;
             list = new List<string>();
             Load();
         }
@@ -46,7 +47,7 @@ namespace CoinInvest
             }
         }
 
-        public void Safe()
+        public void Save()
         {
             XElement root = new XElement("Orders");
             foreach (var item in list)
@@ -66,7 +67,7 @@ namespace CoinInvest
 
 
 
-        internal IEnumerable<string> GetIds()
+        public IEnumerable<string> GetIds()
         {
             return list;
         }
