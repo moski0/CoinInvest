@@ -10,5 +10,6 @@ namespace CoinInvest
     {
         public const string LTC_EUR = "LTC-EUR";
         public const string BTC_EUR = "BTC-EUR";
+        public const string ETH_EUR = "ETH-EUR";
     }
 }

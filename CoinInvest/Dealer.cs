@@ -38,10 +38,10 @@ namespace CoinInvest
 
         private class ImportantValues
         {
-            public static decimal buyPricePercentageFromActualPrice = (decimal)0.3;//3
+            public static decimal buyPricePercentageFromActualPrice = (decimal)2;//3
             public static int buyLimitPercentageFromDayMax = 80;
-            public static decimal sellProfitPercentageFromBuyPrice = (decimal)0.5;//5
-            public static decimal buyCoinSize = (decimal)0.02;
+            public static decimal sellProfitPercentageFromBuyPrice = (decimal)4;//5
+            public static decimal buyCoinSize = (decimal)0.01;
             public static decimal minPriceInEur = (decimal)0.01;
         }
 

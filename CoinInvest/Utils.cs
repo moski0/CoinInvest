@@ -22,17 +22,20 @@ namespace CoinInvest
                 case Constants.LTC_EUR:
                     res = ProductType.LtcEur;
                     break;
+                case Constants.ETH_EUR:
+                    res = ProductType.EthEur;
+                    break;
             }
             return res;
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public string GetCurrentMethod()
-        {
-            StackTrace st = new StackTrace();
-            StackFrame sf = st.GetFrame(1);
+        //[MethodImpl(MethodImplOptions.NoInlining)]
+        //public string GetCurrentMethod()
+        //{
+        //    StackTrace st = new StackTrace();
+        //    StackFrame sf = st.GetFrame(1);
 
-            return sf.GetMethod().Name;
-        }
+        //    return sf.GetMethod().Name;
+        //}
     }
 }
